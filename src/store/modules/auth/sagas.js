@@ -4,23 +4,26 @@ import {
 import { toast } from 'react-toastify';
 import * as actions from './actions';
 import * as types from '../types';
+import axios from '../../../services/axios';
+import history from '../../../services/history';
 
-const requisicao = () => new Promise((resolve, reject) => {
-  setTimeout(() => {
-    resolve();
-  }, 600);
-});
-
-function* exampleRequest() {
+function* loginRequest({ payload }) {
   try {
-    yield call(requisicao);
-    yield put(actions.clicaBotaoSuccess());
-  } catch {
-    toast.error('Deu erro.');
-    yield put(actions.clicaBotaoFailure());
+    const response = yield call(axios.post, '/tokens', 'payload');
+    yield put(actions.loginSuccess({ ...response.data }));
+
+    toast.success('Você fez login');
+
+    axios.defaults.headers.Authorization = `Bearer ${response.data.token}`;
+
+    history.push(payload.prevPath);
+  } catch (e) {
+    toast.error('Usuário ou senha inválidos!');
+
+    yield put(actions.loginFailure());
   }
 }
 
 export default all([
-  takeLatest(types.BOTAO_CLICADO_REQUEST, exampleRequest),
+  takeLatest(types.LOGIN_REQUEST, loginRequest),
 ]);
