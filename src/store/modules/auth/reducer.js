@@ -7,11 +7,14 @@ const initialState = {
   isLoading: false,
 };
 
-export default function redu(state = initialState, action = {}) {
+export default function (state = initialState, action = {}) {
   switch (action.type) {
     case types.LOGIN_SUCCESS: {
-      console.log('REDUCER', action.payload);
-      return state;
+      const newState = { ...state };
+      newState.isLoggedIn = true;
+      newState.token = action.payload.token;
+      newState.user = action.payload.user;
+      return newState;
     }
 
     case types.LOGIN_FAILURE: {

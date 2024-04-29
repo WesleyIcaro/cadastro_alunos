@@ -6,7 +6,7 @@ import { get } from 'lodash';
 
 import { Container } from '../../styles/GlobalStyles';
 import { Form } from './styled';
-import * as actios from '../../store/modules/auth/actions';
+import * as actions from '../../store/modules/auth/actions';
 
 export default function Login(props) {
   const dispath = useDispatch();
@@ -33,7 +33,7 @@ export default function Login(props) {
 
     if (formErrors) return;
 
-    dispath(actios.loginRequest({ email, password, prevPath }));
+    dispath(actions.loginRequest({ email, password, prevPath }));
   };
 
   return (
