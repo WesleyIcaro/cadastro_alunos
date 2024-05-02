@@ -30,7 +30,6 @@ export default function (state = initialState, action = {}) {
     }
 
     case types.REGISTER_UPDATED_SUCCESS: {
-      console.log(action.payload);
       const newState = { ...state };
       newState.user.nome = action.payload.nome;
       newState.user.email = action.payload.email;
@@ -39,7 +38,6 @@ export default function (state = initialState, action = {}) {
     }
 
     case types.REGISTER_CREATED_SUCCESS: {
-      console.log(action.payload);
       const newState = { ...state };
       newState.isLoading = false;
       return newState;

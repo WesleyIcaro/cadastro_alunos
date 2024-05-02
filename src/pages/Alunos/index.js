@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { get } from 'lodash';
 import { FaUserCircle, FaEdit, FaWindowClose } from 'react-icons/fa';
 
+import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 import { Container } from '../../styles/GlobalStyles';
 import { AlunoContainer, ProfilePicture } from './styled';
 import axios from '../../services/axios';
@@ -10,6 +12,8 @@ import axios from '../../services/axios';
 import Loading from '../../components/Loading';
 
 export default function Alunos() {
+  const isLoggedIn = useSelector((state) => (state.auth.isLoggedIn));
+
   const [alunos, setAlunos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -23,6 +27,27 @@ export default function Alunos() {
 
     getData();
   }, []);
+
+  const handleDelete = async (e, alunoId) => {
+    e.preventDefault();
+
+    console.log(e);
+
+    console.log(isLoggedIn);
+
+    try {
+      if (isLoggedIn) {
+        const response = await axios.delete(`/alunos/${alunoId}`);
+        const index = alunos.indexOf(response);
+        setAlunos.splice(0, index);
+        toast.success('Aluno excluído com sucesso!');
+      } else {
+        toast.error('Faça login para excluir aluno');
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
     <Container>
@@ -43,7 +68,8 @@ export default function Alunos() {
             <span>{aluno.email}</span>
 
             <Link to={`/aluno/${aluno.id}/edit`}><FaEdit size={16} /></Link>
-            <Link to={`/aluno/${aluno.id}/delete`}><FaWindowClose size={16} /></Link>
+            {isLoggedIn ? <Link to={`/aluno/${aluno.id}/delete`} onClick={(e) => handleDelete(e, aluno.id)}><FaWindowClose size={16} /></Link>
+              : <Link to="/login" onClick={(e) => handleDelete(e)}><FaWindowClose size={16} /></Link> }
           </div>
         ))}
       </AlunoContainer>
