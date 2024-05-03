@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { get } from 'lodash';
-import { FaUserCircle, FaEdit, FaWindowClose } from 'react-icons/fa';
+import {
+  FaUserCircle, FaEdit, FaWindowClose, FaExclamation,
+} from 'react-icons/fa';
 
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Container } from '../../styles/GlobalStyles';
 import { AlunoContainer, ProfilePicture } from './styled';
 import axios from '../../services/axios';
+import history from '../../services/history';
 
 import Loading from '../../components/Loading';
 
@@ -28,24 +31,37 @@ export default function Alunos() {
     getData();
   }, []);
 
-  const handleDelete = async (e, alunoId) => {
+  const handleDeleteAsk = async (e) => {
     e.preventDefault();
+    const exclamation = e.currentTarget.nextSibling;
+    exclamation.setAttribute('display', 'block');
+    e.currentTarget.remove();
+  };
 
-    console.log(e);
-
-    console.log(isLoggedIn);
+  const handleDelete = async (e, id, index) => {
+    e.persist();
 
     try {
-      if (isLoggedIn) {
-        const response = await axios.delete(`/alunos/${alunoId}`);
-        const index = alunos.indexOf(response);
-        setAlunos.splice(0, index);
-        toast.success('Aluno excluído com sucesso!');
-      } else {
-        toast.error('Faça login para excluir aluno');
-      }
+      setIsLoading(true);
+      await axios.delete(`/alunos/${id}`);
+      const novosAlunos = [...alunos];
+      novosAlunos.splice(index, 1);
+      setAlunos(novosAlunos);
+      setIsLoading(false);
     } catch (err) {
-      console.log(err);
+      // const errors = get(err, 'response.data.errors', []);
+      const status = get(err, 'response.status', 0);
+
+      if (status === 401) {
+        toast.error('Você precisa fazer login');
+        history.push('/login');
+      } else {
+        toast.error('Ocorreu um erro ao excluir aluno');
+      }
+
+      // errors.map((error) => toast.error(error));
+      console.log(err.response);
+      setIsLoading(false);
     }
   };
 
@@ -55,7 +71,7 @@ export default function Alunos() {
       <h1>Alunos</h1>
 
       <AlunoContainer>
-        {alunos.map((aluno) => (
+        {alunos.map((aluno, index) => (
           <div key={String(aluno.id)}>
             <ProfilePicture>
               {get(aluno, 'Fotos[0].url', false) ? (
@@ -68,8 +84,9 @@ export default function Alunos() {
             <span>{aluno.email}</span>
 
             <Link to={`/aluno/${aluno.id}/edit`}><FaEdit size={16} /></Link>
-            {isLoggedIn ? <Link to={`/aluno/${aluno.id}/delete`} onClick={(e) => handleDelete(e, aluno.id)}><FaWindowClose size={16} /></Link>
-              : <Link to="/login" onClick={(e) => handleDelete(e)}><FaWindowClose size={16} /></Link> }
+            <Link to={`/aluno/${aluno.id}/delete`} onClick={handleDeleteAsk}><FaWindowClose size={16} /></Link>
+
+            <FaExclamation size={16} display="none" cursor="pointer" onClick={(e) => handleDelete(e, aluno.id, index)} />
           </div>
         ))}
       </AlunoContainer>
