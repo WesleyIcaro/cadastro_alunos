@@ -8,7 +8,7 @@ import {
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { Container } from '../../styles/GlobalStyles';
-import { AlunoContainer, ProfilePicture } from './styled';
+import { AlunoContainer, ProfilePicture, NovoAluno } from './styled';
 import axios from '../../services/axios';
 import history from '../../services/history';
 
@@ -49,7 +49,6 @@ export default function Alunos() {
       setAlunos(novosAlunos);
       setIsLoading(false);
     } catch (err) {
-      // const errors = get(err, 'response.data.errors', []);
       const status = get(err, 'response.status', 0);
 
       if (status === 401) {
@@ -59,8 +58,6 @@ export default function Alunos() {
         toast.error('Ocorreu um erro ao excluir aluno');
       }
 
-      // errors.map((error) => toast.error(error));
-      console.log(err.response);
       setIsLoading(false);
     }
   };
@@ -69,6 +66,8 @@ export default function Alunos() {
     <Container>
       <Loading isLoading={isLoading} />
       <h1>Alunos</h1>
+
+      <NovoAluno to="/aluno/">Novo aluno</NovoAluno>
 
       <AlunoContainer>
         {alunos.map((aluno, index) => (
