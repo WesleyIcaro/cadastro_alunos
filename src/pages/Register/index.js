@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { isEmail } from 'validator';
 import { useSelector, useDispatch } from 'react-redux';
+import { get } from 'lodash';
 
 import { Container } from '../../styles/GlobalStyles';
 import { Form } from './styled';
 import Loading from '../../components/Loading';
 import * as actions from '../../store/modules/auth/actions';
+import axios from '../../services/axios';
+import history from '../../services/history';
 
 export default function Register() {
   const dispatch = useDispatch();
@@ -52,6 +55,31 @@ export default function Register() {
     }));
   }
 
+  async function handleDelete(e) {
+    e.preventDefault();
+
+    try {
+      // isLoading(true);
+      await axios.delete('/users');
+      toast.success('Sua conta foi deletada com sucesso');
+      history.push('/login');
+      dispatch(actions.loginFailure());
+      // isLoading(false);
+    } catch (err) {
+      const status = get(err, 'response.status', 0);
+      const data = get(err, 'response.data', {});
+      const errors = get(data, 'errors', []);
+
+      if (errors.length > 0) {
+        errors.map((error) => toast.error(error));
+      } else {
+        toast.success('Erro desconhecido');
+      }
+
+      if (status === 401) dispatch(actions.loginFailure());
+    }
+  }
+
   return (
     <Container>
       <Loading isLoading={isLoading} />
@@ -75,7 +103,10 @@ export default function Register() {
         </label>
 
         <button type="submit">{id ? 'Salvar' : 'Criar conta'}</button>
+
+        {id ? <button type="button" onClick={handleDelete}>Deletar minha conta</button> : ''}
       </Form>
+
     </Container>
   );
 }

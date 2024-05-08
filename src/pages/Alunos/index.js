@@ -47,6 +47,7 @@ export default function Alunos() {
       const novosAlunos = [...alunos];
       novosAlunos.splice(index, 1);
       setAlunos(novosAlunos);
+      toast.success('Aluno deletado com sucesso');
       setIsLoading(false);
     } catch (err) {
       const status = get(err, 'response.status', 0);

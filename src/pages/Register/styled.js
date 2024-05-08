@@ -24,4 +24,7 @@ input {
   }
 }
 
+button + button {
+    margin-top: 1rem;
+  }
 `;
